@@ -25,7 +25,3 @@ class MemberController(
             .map { token -> LoginResponse(token) }
     }
 }
-
-data class LoginResponse(
-    val token: String
-) 

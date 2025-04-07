@@ -1,10 +1,11 @@
 package com.example.webflux.adapter.`in`.web
 
-import com.example.webflux.application.port.`in`.SignUpCommand
+import com.example.webflux.application.port.`in`.LoginUseCase
 import com.example.webflux.application.port.`in`.SignUpUseCase
 import com.example.webflux.domain.Member
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -22,26 +23,27 @@ class MemberControllerTest {
     @MockBean
     private lateinit var signUpUseCase: SignUpUseCase
 
+    @MockBean
+    private lateinit var loginUseCase: LoginUseCase
+
     @Test
-    fun `회원가입 API 성공 테스트`() {
+    fun `회원가입 성공 테스트`() {
         // given
         val request = SignUpRequest(
             email = "test@example.com",
             password = "password123",
-            username = "testuser"
+            username = "테스트"
         )
 
-        val command = request.toCommand()
-
-        val savedMember = Member(
+        val member = Member(
             id = 1L,
-            email = command.email,
-            password = command.password,
-            username = command.username,
+            email = request.email,
+            password = request.password,
+            username = request.username,
             createdAt = LocalDateTime.now()
         )
 
-        `when`(signUpUseCase.signUp(command)).thenReturn(Mono.just(savedMember))
+        whenever(signUpUseCase.signUp(any())).thenReturn(Mono.just(member))
 
         // when & then
         webTestClient.post()
@@ -51,31 +53,30 @@ class MemberControllerTest {
             .exchange()
             .expectStatus().isCreated
             .expectBody()
-            .jsonPath("$.id").isEqualTo(savedMember.id)
-            .jsonPath("$.email").isEqualTo(savedMember.email)
-            .jsonPath("$.username").isEqualTo(savedMember.username)
+            .jsonPath("$.id").isEqualTo(1)
+            .jsonPath("$.email").isEqualTo(request.email)
+            .jsonPath("$.username").isEqualTo(request.username)
     }
 
     @Test
-    fun `회원가입 API 실패 테스트 - 이미 존재하는 이메일`() {
+    fun `로그인 성공 테스트`() {
         // given
-        val request = SignUpRequest(
+        val request = LoginRequest(
             email = "test@example.com",
-            password = "password123",
-            username = "testuser"
+            password = "password123"
         )
 
-        val command = request.toCommand()
-
-        `when`(signUpUseCase.signUp(command))
-            .thenReturn(Mono.error(RuntimeException("이미 존재하는 이메일입니다.")))
+        val token = "test.jwt.token"
+        whenever(loginUseCase.login(any())).thenReturn(Mono.just(token))
 
         // when & then
         webTestClient.post()
-            .uri("/api/members/signup")
+            .uri("/api/members/login")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request)
             .exchange()
-            .expectStatus().is5xxServerError
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$.token").isEqualTo(token)
     }
 } 

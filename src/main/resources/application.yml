@@ -8,10 +8,34 @@ spring:
     url: r2dbc:mysql://localhost:3306/webflux_demo
     username: root
     password: rlgus585
-  sql:
-    init:
-      mode: always
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: email-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.example.webflux.adapter.out.messaging
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    password: your-app-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 jwt:
-  secret: KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
+  secret: "your-256-bit-secret-key-here-must-be-longer-than-256-bits"
   expiration-time: 86400000  # 24시간
+
+kafka:
+  topics:
+    member-registered: member-registered-topic

@@ -5,6 +5,7 @@ import com.example.webflux.application.port.`in`.SignUpUseCase
 import com.example.webflux.application.port.out.LoadMemberPort
 import com.example.webflux.application.port.out.SaveMemberPort
 import com.example.webflux.domain.Member
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.switchIfEmpty
@@ -12,7 +13,8 @@ import reactor.kotlin.core.publisher.switchIfEmpty
 @Service
 class SignUpService(
     private val loadMemberPort: LoadMemberPort,
-    private val saveMemberPort: SaveMemberPort
+    private val saveMemberPort: SaveMemberPort,
+    private val passwordEncoder: PasswordEncoder
 ) : SignUpUseCase {
 
     override fun signUp(command: SignUpCommand): Mono<Member> {
@@ -24,10 +26,10 @@ class SignUpService(
                 saveMemberPort.save(
                     Member(
                         email = command.email,
-                        password = command.password,
+                        password = passwordEncoder.encode(command.password),
                         username = command.username
                     )
                 )
             }
     }
-} 
+}
