@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: webflux-demo
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/webflux_demo
+    username: root
+    password: rlgus585
+  sql:
+    init:
+      mode: always
