@@ -11,3 +11,7 @@ spring:
   sql:
     init:
       mode: always
+
+jwt:
+  secret: KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
+  expiration-time: 86400000  # 24시간
